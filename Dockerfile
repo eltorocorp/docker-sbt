@@ -17,10 +17,12 @@ RUN wget -O- "https://cocl.us/sbt-0.13.16.tgz" \
     |  tar xzf - -C /usr/local --strip-components=1
 
 # Configure and Prefetch SBT
-COPY sbtopts /usr/local/conf/sbtopts
+COPY assets/sbtopts /usr/local/conf/sbtopts
 RUN sbt exit
 RUN chmod a+w /app -R
 
+# add git
+RUN apk add --no-cache git
 
 # Remove build dependencies
 RUN apk del --no-cache .dependencies
