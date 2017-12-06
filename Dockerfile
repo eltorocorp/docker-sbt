@@ -11,13 +11,13 @@ RUN wget -O- "http://downloads.lightbend.com/scala/2.11.8/scala-2.11.8.tgz" \
     | tar xzf - -C /usr/local --strip-components=1
 
 # Install SBT
-#RUN wget -O- "https://github.com/sbt/sbt/releases/download/v0.13.16/sbt-0.13.16.tgz" \
-#    |  tar xzf - -C /usr/local --strip-components=1
 RUN wget -O- "https://cocl.us/sbt-0.13.16.tgz" \
-    |  tar xzf - -C /usr/local --strip-components=1
+    |  tar xzf - -C /usr/local --strip-components=1 \
+    && sbt exit
 
 # Configure and Prefetch SBT
-COPY assets/sbtopts /usr/local/conf/sbtopts
+RUN mkdir -p /app
+ENV SBT_OPTS=-Duser.home=/app
 RUN sbt exit
 RUN chmod a+w /app -R
 
