@@ -24,6 +24,10 @@ RUN chmod a+w /app -R
 # add git
 RUN apk add --no-cache git
 
+# add glibc for protoc
+apk --allow-untrusted --no-cache -X http://apkproxy.heroku.com/andyshinn/alpine-pkg-glibc add glibc glibc-bin
+apk add --no-cache libstdc++
+
 # Remove build dependencies
 RUN apk del --no-cache .dependencies
 
