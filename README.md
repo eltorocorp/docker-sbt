@@ -10,3 +10,10 @@ To use a local ivy2 cache, map it to /app/.ivy2 within the image:
 To use a local sbt configuration, map it to /app/.sbt within the image:
 
     -v /var/lib/jenkins/.sbt:/app/.sbt
+
+
+### Build & Run
+
+    docker build -t docker-sbt .
+    docker run -u 1000:1000 -i -t -v $HOME/.sbt:/app/.sbt -v $HOME/.ivy2:/app/.ivy2 --rm docker-sbt:latest /bin/bash
+ 

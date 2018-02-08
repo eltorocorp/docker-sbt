@@ -1,40 +1,33 @@
-FROM openjdk:8-alpine
+FROM openjdk:8
 
-# The bash shell is required by Scala utilities
-RUN apk add --no-cache bash
+ENV SCALA_VERSION 2.11.12
+ENV SBT_VERSION 0.13.16
+ENV SBT_OPTS=-Duser.home=/work
 
-# Install build dependencies
-RUN apk add --no-cache --virtual=.dependencies tar wget
+RUN mkdir -p /work
+
+# Scala expects this file
+RUN touch /usr/lib/jvm/java-8-openjdk-amd64/release
 
 # Install Scala
-RUN wget -O- "http://downloads.lightbend.com/scala/2.11.8/scala-2.11.8.tgz" \
+RUN curl -fsL "http://downloads.typesafe.com/scala/$SCALA_VERSION/scala-$SCALA_VERSION.tgz" \
     | tar xzf - -C /usr/local --strip-components=1
 
 # Install SBT
-RUN wget -O- "https://cocl.us/sbt-0.13.16.tgz" \
-    |  tar xzf - -C /usr/local --strip-components=1 \
-    && sbt exit
+RUN \
+  curl -fsL -o sbt-$SBT_VERSION.deb https://dl.bintray.com/sbt/debian/sbt-$SBT_VERSION.deb && \
+  dpkg -i sbt-$SBT_VERSION.deb && \
+  rm sbt-$SBT_VERSION.deb && \
+  apt-get update && \
+  apt-get install sbt && \
+  sbt sbtVersion
 
-# Configure and Prefetch SBT
-RUN mkdir -p /app
-ENV SBT_OPTS=-Duser.home=/app
-RUN sbt exit
-RUN chmod a+w /app -R
+RUN chmod a+w /work -R
 
 # add git
-RUN apk add --no-cache git
+RUN apt-get install git
 
-# add glibc for protoc
-RUN apk add --no-cache ca-certificates openssl wget
-RUN wget -q -O /etc/apk/keys/sgerrand.rsa.pub https://raw.githubusercontent.com/sgerrand/alpine-pkg-glibc/master/sgerrand.rsa.pub
-RUN wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.26-r0/glibc-2.26-r0.apk
-RUN apk add --no-cache glibc-2.26-r0.apk
-RUN rm glibc-2.26-r0.apk
-
-# Remove build dependencies
-RUN apk del --no-cache .dependencies
-
-VOLUME /app
-WORKDIR /app
+VOLUME /work
+WORKDIR /work
 
 CMD ["sbt"]
